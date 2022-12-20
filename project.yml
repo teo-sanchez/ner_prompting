@@ -1,0 +1,133 @@
+title: "Name Entity Recognition for text-to-image prompting"
+description: >
+Project to train a evaluate a name entity recognition model to analyzing text-to-image prompts.
+
+The entities comprise 17 categories 7 main categories and 11 subcategories, extracted from a topic analysis made with [BERTopic](https://maartengr.github.io/BERTopic/index.html).
+The topic analysis can be explored [the following visualization](https://teo-sanchez.github.io/projects/prompting_map.html).
+
+├── medium/
+│   ├── photography
+│   ├── painting
+│   ├── rendering
+│   └── illustration
+├── influence/
+│   ├── artist
+│   ├── genre
+│   ├── artwork
+│   └── repository
+├── context/
+│   ├── era
+│   ├── weather
+│   └── mood
+├── color 
+├── light
+├── detail
+└── composition
+
+
+Prompt data are from the [diffusionDB](https://poloclub.github.io/diffusiondb/) database and were annotated by hand using [Prodigy](https://prodi.gy/).
+
+# Variables can be referenced across the project.yml using ${vars.var_name}
+vars:
+  config_pretrain: "config_cpu_pretrain.cfg"
+  config_train: "config_cpu_train.cfg"
+  name: "ner_prompting"
+  version: "0.0.1"
+  train: "ner_prompting_training"
+  dev: "ner_prompting_eval"
+
+# These are the directories that the project needs. The project CLI will make
+# sure that they always exist.
+directories: ["assets", "training", "configs", "scripts", "corpus", "packages", "hub"]
+
+# Assets that should be downloaded or available in the directory. We're shipping
+# them with the project, so they won't have to be downloaded. But the
+# 'project assets' command still lets you verify that the checksums match.
+assets:
+  - dest: "assets/${vars.train}.jsonl"
+    checksum: "63373dd656daa1fd3043ce166a59474c"
+    description: "JSONL-formatted training data exported from Prodigy, annotated with 17 entities"
+  - dest: "assets/${vars.dev}.jsonl"
+    checksum: "5113dc04e03f079525edd8df3f4f39e3"
+    description: "JSONL-formatted development data exported from Prodigy, annotated with 17 entities"
+  - dest: "assets/diffusiondb_raw_prompts.jsonl"
+    checksum: "1213dc04e03f0f9525edd80f3f4a39e3"
+    description: "JSONL-formatted of all diffusionDB prompts"
+
+# Workflows are sequences of commands (see below) executed in order. You can
+# run them via "spacy project run [workflow]". If a commands's inputs/outputs
+# haven't changed, it won't be re-run.
+workflows:
+  all:
+    - preprocess
+    - pretrain
+    - train
+    - evaluate
+    - package
+    - push_to_hub
+
+commands:
+  - name: "install"
+    help: "Install dependencies, log in to Hugging Face and download a model"
+    script:
+      - "pip install -r requirements.txt"
+      - "huggingface-cli login"
+
+  # Replace this with any code to train a pipeline
+  - name: "preprocess"
+    help: "Convert the data to spaCy's binary format"
+    script:
+      - "python scripts/preprocess.py assets/${vars.train}.jsonl corpus/${vars.train}.spacy"
+      - "python scripts/preprocess.py assets/${vars.dev}.jsonl corpus/${vars.dev}.spacy"
+    deps:
+      - "assets/${vars.train}.jsonl"
+      - "assets/${vars.dev}.jsonl"
+      - "scripts/preprocess.py"
+    outputs:
+      - "corpus/${vars.train}.spacy"
+      - "corpus/${vars.dev}.spacy"
+
+  - name: "pretrain"
+    help: "Pretrain the embedding on all prompts"
+    script:
+      - "wget https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.4.1/en_core_web_lg-3.4.1-py3-none-any.whl"
+      - "pip install en_core_web_lg-3.4.1-py3-none-any.whl"
+      - "spacy pretrain configs/${vars.config_pretrain} training/pretrain_embedding --paths.raw_text diffusiondb_raw_prompts.jsonl -g 0"
+
+  - name: "train"
+    help: "Train a named entity recognition model"
+    script:
+      - "python -m spacy train configs/${vars.config_train} --output training/ --paths.train corpus/${vars.train}.spacy --paths.dev corpus/${vars.dev}.spacy"
+    deps:
+      - "corpus/${vars.train}.spacy"
+      - "corpus/${vars.dev}.spacy"
+    outputs:
+      - "training/model-best"
+
+  - name: "evaluate"
+    help: "Evaluate the model and export metrics"
+    script:
+      - "python -m spacy evaluate training/model-best corpus/${vars.dev}.spacy --output training/metrics.json"
+    deps:
+      - "corpus/${vars.dev}.spacy"
+      - "training/model-best"
+    outputs:
+      - "training/metrics.json"
+
+  # Create the package using --build wheel
+  - name: package
+    help: "Package the trained model so it can be installed"
+    script:
+      - "python -m spacy package training/model-best packages --name ${vars.name} --version ${vars.version} --force --build wheel"
+    deps:
+      - "training/model-best"
+    outputs_no_cache:
+      - "packages/en_${vars.name}-${vars.version}/dist/en_${vars.name}-${vars.version}-py3-none-any.whl"
+
+  # Push the package to the Hub
+  - name: push_to_hub
+    help: Push the model to the Hub
+    script:
+      - "python -m spacy huggingface-hub push packages/en_${vars.name}-${vars.version}/dist/en_${vars.name}-${vars.version}-py3-none-any.whl"
+    deps:
+      - "packages/en_${vars.name}-${vars.version}"
