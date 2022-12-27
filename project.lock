@@ -35,10 +35,10 @@ evaluate:
     - path: corpus/ner_prompting_eval.spacy
       md5: 9ca87d0e0a330acdcfeec7360ba3495e
     - path: training/model-best
-      md5: 346098f3c73b43ea36fde9826f4c9684
+      md5: 25231153383a73e18c73f15a7ef583b8
   outs:
     - path: training/metrics.json
-      md5: 2d9505b8e464ac8a01cf98b6bedbcbd2
+      md5: 352d4de119bcbb3cdd718465243039ba
   spacy_version: 3.4.3
   spacy_git_version: 63673a792
 package:
@@ -62,5 +62,20 @@ push_to_hub:
     - path: packages/en_ner_prompting-0.0.1
       md5: 3b30b8e8a36ecc10d2df9dbee1cda97f
   outs: []
+  spacy_version: 3.4.3
+  spacy_git_version: 63673a792
+train:
+  cmd: python -m spacy run train
+  script:
+    - python -m spacy train configs/config_cpu_train.cfg --output training/ --paths.train
+      corpus/ner_prompting_training.spacy --paths.dev corpus/ner_prompting_eval.spacy
+  deps:
+    - path: corpus/ner_prompting_training.spacy
+      md5: 091356654aa1746555cf8e601c245a66
+    - path: corpus/ner_prompting_eval.spacy
+      md5: 9ca87d0e0a330acdcfeec7360ba3495e
+  outs:
+    - path: training/model-best
+      md5: 25231153383a73e18c73f15a7ef583b8
   spacy_version: 3.4.3
   spacy_git_version: 63673a792

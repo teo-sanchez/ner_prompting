@@ -19,24 +19,19 @@ description: >
   │   ├── era
   │   ├── weather
   │   └── mood
-  ├── color 
+  ├── color
   ├── light
   ├── detail
   └── composition
   Prompt data are from the [diffusionDB](https://poloclub.github.io/diffusiondb/) database and were annotated by hand using [Prodigy](https://prodi.gy/).
 
-# TODO:
-#   - [ ] Train a model
-#   - [ ] Add training data online (bucket)
-#   - [ ] Remove all punctuation to the training data
-#   - [ ] Generate README.md
 
 # Variables can be referenced across the project.yml using ${vars.var_name}
 vars:
   config_pretrain: "config_cpu_pretrain.cfg"
   config_train: "config_cpu_train.cfg"
   name: "ner_prompting"
-  version: "0.0.1"
+  version: "0.0.2"
   train: "ner_prompting_training"
   dev: "ner_prompting_eval"
   company: selas-ai
@@ -53,7 +48,7 @@ assets:
     url: "https://storage.googleapis.com/selas-api/diffusion_raw_prompts.jsonl"
     description: "JSONL-formatted of all diffusionDB prompts"
   - dest: "assets/ner_prompting.jsonl"
-    url: "https://storage.googleapis.com/selas-api/assets/ner_prompting.jsonl"
+    url: "https://storage.googleapis.com/selas-api/ner_prompting.jsonl"
     description: "JSONL-formatted development data exported from Prodigy, annotated with 17 entities"
 
 # Workflows are sequences of commands (see below) executed in order. You can
@@ -83,7 +78,7 @@ commands:
       - "python scripts/preprocess.py assets/${vars.train}.jsonl corpus/${vars.train}.spacy"
       - "python scripts/preprocess.py assets/${vars.dev}.jsonl corpus/${vars.dev}.spacy"
     deps:
-      - "scripts/ner_prompting.jsonl"
+      - "assets/ner_prompting.jsonl"
       - "scripts/preprocess.py"
       - "scripts/eval_split.py"
     outputs:
