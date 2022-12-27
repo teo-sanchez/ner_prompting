@@ -71,6 +71,21 @@ def eval_split(jsonl_path: str, split_ratio: float = 0.2, output_path: str = "/r
         jsonl_path (str): Path to jsonl file
         split_ratio (_type_): Ratio of eval to train
     """
+    # Merge "composition/scale" and "composition/view" by "composition" in the data stored in jsonl_path
+    # Open the file in read mode
+    with open(jsonl_path, 'r') as f:
+        # Read the contents of the file into a string
+        contents = f.read()
+    # Replace all occurrences of the target string with the replacement string
+    contents = contents.replace('composition/view', 'composition')
+    contents = contents.replace('composition/scale', 'composition')
+    # Open the file in write mode
+    with open(jsonl_path, 'w') as f:
+        # Write the modified string to the file
+        f.write(contents)
+    # Close the file
+    f.close()
+
     with open(jsonl_path) as f:
         data = [json.loads(line) for line in f]
     augmented_data = remove_punctuation(data)

@@ -38,20 +38,20 @@ evaluate:
       md5: 25231153383a73e18c73f15a7ef583b8
   outs:
     - path: training/metrics.json
-      md5: 352d4de119bcbb3cdd718465243039ba
+      md5: 8da50933e6cd492ca1d5af2d1cc59215
   spacy_version: 3.4.3
   spacy_git_version: 63673a792
 package:
   cmd: python -m spacy run package
   script:
     - python -m spacy package training/model-best packages --name ner_prompting --version
-      0.0.1 --force --build wheel
+      0.0.2 --force --build wheel
   deps:
     - path: training/model-best
-      md5: 346098f3c73b43ea36fde9826f4c9684
+      md5: 25231153383a73e18c73f15a7ef583b8
   outs:
-    - path: packages/en_ner_prompting-0.0.1/dist/en_ner_prompting-0.0.1-py3-none-any.whl
-      md5: 22e6fae6ca6ef295262c4099b1fa3ab6
+    - path: packages/en_ner_prompting-0.0.2/dist/en_ner_prompting-0.0.2-py3-none-any.whl
+      md5: 429f90328a570ed0af97a9b960b597b9
   spacy_version: 3.4.3
   spacy_git_version: 63673a792
 push_to_hub:

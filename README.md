@@ -1,14 +1,33 @@
 <!-- SPACY PROJECT: AUTO-GENERATED DOCS START (do not remove) -->
 
-# 🪐 spaCy Project: Hugging Face Hub integration
+# 🪐 spaCy Project: Name Entity Recognition for text-to-image prompting
 
-With [Hugging Face Hub](https://https://huggingface.co/), you can easily share any trained pipeline with the community. The Hugging Face Hub offers:
+Project to train a evaluate a name entity recognition model to analyzing text-to-image prompts.
+The entities comprise 17 categories 7 main categories and 11 subcategories, extracted from a topic analysis made with [BERTopic](https://maartengr.github.io/BERTopic/index.html). The topic analysis can be explored [the following visualization](https://teo-sanchez.github.io/projects/prompting_map.html).
 
-- Free model hosting.
-- Built-in file versioning, even with very large files, thanks to a git-based approach.
-- In-browser widgets to play with the uploaded models.
+```
+Specifier taxonomy
+├── medium/
+│   ├── photography
+│   ├── painting
+│   ├── rendering
+│   └── illustration
+├── influence/
+│   ├── artist
+│   ├── genre
+│   ├── artwork
+│   └── repository
+├── light
+├── color
+├── composition
+├── detail
+└── context/
+    ├── era
+    ├── weather
+    └── emotion
+```
 
-This uses [`spacy-huggingface-hub`](https://github.com/explosion/spacy-huggingface-hub) to push a packaged pipeline to the Hugging Face Hub, including the `whl` file. This enables using `pip install`ing a pipeline directly from the Hugging Face Hub.
+Prompt data are from the [diffusionDB](https://poloclub.github.io/diffusiondb/) database and were annotated by hand using [Prodigy](https://prodi.gy/).
 
 
 ## 📋 project.yml
@@ -27,6 +46,7 @@ Commands are only re-run if their inputs have changed.
 | --- | --- |
 | `install` | Install dependencies, log in to Hugging Face and download a model |
 | `preprocess` | Convert the data to spaCy's binary format |
+| `pretrain` | Pretrain the embedding on all prompts |
 | `train` | Train a named entity recognition model |
 | `evaluate` | Evaluate the model and export metrics |
 | `package` | Package the trained model so it can be installed |
@@ -41,7 +61,7 @@ inputs have changed.
 
 | Workflow | Steps |
 | --- | --- |
-| `all` | `preprocess` &rarr; `train` &rarr; `evaluate` &rarr; `package` &rarr; `push_to_hub` |
+| `all` | `preprocess` &rarr; `pretrain` &rarr; `train` &rarr; `evaluate` &rarr; `package` &rarr; `push_to_hub` |
 
 ### 🗂 Assets
 
@@ -51,7 +71,7 @@ in the project directory.
 
 | File | Source | Description |
 | --- | --- | --- |
-| [`assets/fashion_brands_training.jsonl`](assets/fashion_brands_training.jsonl) | Local | JSONL-formatted training data exported from Prodigy, annotated with `FASHION_BRAND` entities (1235 examples) |
-| [`assets/fashion_brands_eval.jsonl`](assets/fashion_brands_eval.jsonl) | Local | JSONL-formatted development data exported from Prodigy, annotated with `FASHION_BRAND` entities (500 examples) |
+| `assets/diffusiondb_raw_prompts.jsonl` | URL | JSONL-formatted of all diffusionDB prompts |
+| `assets/ner_prompting.jsonl` | URL | JSONL-formatted development data exported from Prodigy, annotated with 17 entities |
 
 <!-- SPACY PROJECT: AUTO-GENERATED DOCS END (do not remove) -->
