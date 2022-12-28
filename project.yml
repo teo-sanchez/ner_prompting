@@ -31,7 +31,7 @@ vars:
   config_pretrain: "config_cpu_pretrain.cfg"
   config_train: "config_cpu_train.cfg"
   name: "ner_prompting"
-  version: "0.0.2"
+  version: "0.0.3"
   train: "ner_prompting_training"
   dev: "ner_prompting_eval"
   company: selas-ai
@@ -96,7 +96,7 @@ commands:
   - name: "train"
     help: "Train a named entity recognition model"
     script:
-      - "python -m spacy train configs/${vars.config_train} --output training/ --paths.train corpus/${vars.train}.spacy --paths.dev corpus/${vars.dev}.spacy"
+      - "spacy train configs/${vars.config_train} --output training/ --paths.train corpus/${vars.train}.spacy --paths.dev corpus/${vars.dev}.spacy --gpu-id 0 --verbose "
     deps:
       - "corpus/${vars.train}.spacy"
       - "corpus/${vars.dev}.spacy"

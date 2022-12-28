@@ -87,16 +87,24 @@ def eval_split(jsonl_path: str, split_ratio: float = 0.2, output_path: str = "/r
     f.close()
 
     with open(jsonl_path) as f:
-        data = [json.loads(line) for line in f]
-    augmented_data = remove_punctuation(data)
+        augmented_data = [json.loads(line) for line in f]
+    # augmented_data = remove_punctuation(data)
     random.shuffle(augmented_data)
-    split_index = int(len(data) * split_ratio)
+    split_index = int(len(augmented_data) * split_ratio)
     with open(output_path + 'ner_prompting_training.jsonl', 'w') as f:
         for line in augmented_data[split_index:]:
-            f.write(json.dumps(line) + '')
+            try: 
+                line.pop("html")
+            except KeyError:
+                continue
+            f.write(json.dumps(line) + '\n')
     with open(output_path + 'ner_prompting_eval.jsonl', 'w') as f:
         for line in augmented_data[:split_index]:
-            f.write(json.dumps(line) + '')
+            try: 
+                line.pop("html")
+            except KeyError:
+                continue
+            f.write(json.dumps(line) + '\n')
             
 if __name__ == '__main__':
     # take jsonl path as argument and 

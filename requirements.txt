@@ -1,1 +1,2 @@
 spacy-huggingface_hub
+spacy-lookups-data
